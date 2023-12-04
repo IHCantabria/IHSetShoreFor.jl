@@ -1,0 +1,13 @@
+name = "IHSetShoreFor"
+uuid = "01123981-457d-4164-b1f2-64adafa29850"
+authors = ["defreitasL <lucas12.fp@hotmail.com> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
