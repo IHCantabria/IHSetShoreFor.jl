@@ -2,14 +2,8 @@
 using ImageFiltering
 using IHSetUtils
 
-function ShoreFor(OmegaEQ,tp,hb,depthb,D50,Omega,dt,phi = 0, c = 0, D = 0, Dr = 0, Sini = 0, k = 0.5, flagR = 1)
+function ShoreFor_Hybrid(OmegaEQ,tp,hb,depthb,D50,Omega,dt,phi = 0, c = 0, D = 0, Dr = 0, Sini = 0, k = 0.5, flagR = 1)
 
-    # println("phi = $phi")
-    # println("c = $c")
-    # println("D = $D")
-    # println("Dr = $Dr")
-    # println("Sini = $Sini")
-    # println("k = $k")
     rho = 1025.
     g = 9.81
     if length(size(hb)) != 1
@@ -99,7 +93,7 @@ function ShoreFor(OmegaEQ,tp,hb,depthb,D50,Omega,dt,phi = 0, c = 0, D = 0, Dr = 
     
 end
 
-function ShoreFor_CSonly(P,Omega,dt,phi=0,c=0,D=0,Dr=0,Sini=0,k=0.5,flagR=1, r = 0.2)
+function ShoreFor(P,Omega,dt,phi=0,c=0,D=0,Dr=0,Sini=0,k=0.5,flagR=1, r = 0.2)
     # rho = 1025.
     # g = 9.81
     # @views P = @views(1 ./ 16 .* rho .* g .* hb.^2 .* (g .* depthb).^.5)

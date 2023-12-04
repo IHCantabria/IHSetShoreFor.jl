@@ -1,5 +1,6 @@
 module IHSetShoreFor
 
-# Write your package code here.
+export ShoreFor_Hybrid, ShoreFor, ShoreFor_Cal
+include("ShoreFor.jl")
 
 end
