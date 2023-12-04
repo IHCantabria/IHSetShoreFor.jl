@@ -3,6 +3,9 @@ uuid = "01123981-457d-4164-b1f2-64adafa29850"
 authors = ["defreitasL <lucas12.fp@hotmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
+
 [compat]
 julia = "1"
 

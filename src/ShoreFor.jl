@@ -1,7 +1,4 @@
 
-using ImageFiltering
-using IHSetUtils
-
 function ShoreFor_Hybrid(OmegaEQ,tp,hb,depthb,D50,Omega,dt,phi = 0, c = 0, D = 0, Dr = 0, Sini = 0, k = 0.5, flagR = 1)
 
     rho = 1025.
