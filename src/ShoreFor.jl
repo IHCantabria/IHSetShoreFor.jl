@@ -91,21 +91,16 @@ function ShoreFor_Hybrid(OmegaEQ,tp,hb,depthb,D50,Omega,dt,phi = 0, c = 0, D = 0
 end
 
 function ShoreFor(P,Omega,dt,phi=0,c=0,D=0,Dr=0,Sini=0,k=0.5,flagR=1, r = 0.2)
-    # rho = 1025.
-    # g = 9.81
-    # @views P = @views(1 ./ 16 .* rho .* g .* hb.^2 .* (g .* depthb).^.5)
     ii = 0:dt:(D-1)*24
-    @views phivecP = @views(10 .^ (-abs.(ii) ./ (phi * 24)))
+    phivecP = 10 .^ (-abs.(ii) ./ (phi * 24))
     IDX = length(phivecP)
 
     phivecP = [zeros(IDX); phivecP]
     
     vent = reflect(centered(phivecP ./ sum(phivecP)))
-    OmegaEQ = imfilter(vec((Omega .- mean(Omega))), vent, Fill(0)) .+ mean(Omega) #BottleNeck
+    OmegaEQ = imfilter(vec((Omega .- mean(Omega))), vent, Fill(0)) .+ mean(Omega)
 
-    @views F = @views(P.^k) .* @views(OmegaEQ .- Omega) ./ std(OmegaEQ)
-    
-    
+    F = P.^k .* (OmegaEQ .- Omega) ./ std(OmegaEQ)
     F[1:IDX-1] .= 0
     
     S = similar(Omega)
@@ -115,41 +110,29 @@ function ShoreFor(P,Omega,dt,phi=0,c=0,D=0,Dr=0,Sini=0,k=0.5,flagR=1, r = 0.2)
     
     if flagR == 1
         r = similar(Omega)
-        @views r .= abs(sum(@views F[racr]) ./ sum(@views F[rero]))
+        r .= abs(sum(F[racr]) ./ sum(F[rero]))
     elseif flagR == 2
         r = similar(Omega)
         N = length(1:dt:Dr*24)
-        # @views r[1:N] .= abs(sum(@view F[1:N] .* racr[1:N]) ./ sum(@view F[1:N] .* rero[1:N]))
-        @views r[1:N] .= abs(sum(@views F[1:N] .* racr[1:N]) ./ sum(@views F[1:N].*rero[1:N]))
+        r[1:N] .= abs(sum(F[1:N] .* racr[1:N]) ./ sum(F[1:N].*rero[1:N]))
 
-        @views Fcacr = cumulative_sum(@views(F .* racr), N)
-        @views Fcero = cumulative_sum(@views(F .* rero), N)
-        @views r[N:end] .= abs.(Fcacr ./ Fcero)
+        Fcacr = cumulative_sum(F .* racr, N)
+        Fcero = cumulative_sum(F .* rero, N)
+        r[N:end] .= abs.(Fcacr ./ Fcero)
     elseif flagR == 3
         r = fill(r, length(Omega))
     end
-
-    @views r_rero_F = @views r[2:end] .* rero[2:end] .* F[2:end]
-    @views racr_F = @views racr[2:end] .* F[2:end]
-    @views r_rero_F_prev = @views r[1:end-1] .* rero[1:end-1] .* F[1:end-1]
-    @views racr_F_prev = @views racr[1:end-1] .* F[1:end-1]
-    @views S[2:end] .= 0.5 * dt * c * cumsum(r_rero_F .+ racr_F .+ r_rero_F_prev .+ racr_F_prev) .+ S[1]
-    
-    return S, OmegaEQ, F
 end
 
 function ShoreFor_Cal(P,Omega, Yobs,dt,idx_obs,phi=0,D=0,k=0.5)
-    # rho = 1025.
-    # g = 9.81
-    # @views P = @views(1 ./ 16 .* rho .* g .* hb.^2 .* (g .* depthb).^.5)
     ii = 1:dt:D*24
-    @views phivecP = @views(10 .^ (-abs.(ii) ./ (phi * 24)))
+    phivecP = 10 .^ (-abs.(ii) ./ (phi * 24))
     IDX = length(phivecP)
 
     phivecP = [zeros(IDX-1); phivecP]
     vent = reflect(centered(phivecP ./ sum(phivecP)))
-    OmegaEQ = imfilter((Omega .- mean(Omega)), vent, Fill(0)) .+ mean(Omega) #BottleNeck
-    @views F = @views(P.^k) .* @views(OmegaEQ .- Omega) ./ std(OmegaEQ)
+    OmegaEQ = imfilter((Omega .- mean(Omega)), vent, Fill(0)) .+ mean(Omega)
+    F = P.^k .* (OmegaEQ .- Omega) ./ std(OmegaEQ)
 
     rero = F .<= 0
     racr = F .> 0
