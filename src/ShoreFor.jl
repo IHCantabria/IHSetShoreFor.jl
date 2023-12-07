@@ -1,4 +1,86 @@
 
+function run_ShoreFor()
+
+    println("Loading libraries...")
+    wrkDir = pwd()
+    mods = wrkDir*"Modules\\"
+    dats = wrkDir*"Data\\"
+
+    # mods = wrkDir*"\\Modules\\"
+    # dats = wrkDir*"\\Data\\"
+
+    println("Loading datasets...")
+
+    wavF = NCDataset(dats*"wav.nc")
+    ensF = NCDataset(dats*"ens.nc")
+    parF = NCDataset(dats*"par.nc")
+
+    configF = NCDataset(dats*"config.nc")
+
+    println("Unpacking datasets...")
+
+    dt = configF["dt"][:][1]
+    
+    yi = collect(skipmissing(configF["yi"][:]))
+
+    phi = parF["phi"][:][1]
+    c = parF["c"][:][1]
+    D = parF["D"][:][1]
+    Dr = parF["Dr"][:][1]
+    Sini = parF["Sini"][:][1]
+    k = parF["k"][:][1]
+    flagR = parF["flagR"][:][1]
+    r = parF["r"][:][1]
+    
+    brk, angBati, depth, Hberm, D50 = configF["brk"][:][1], configF["angBati"][:][1], configF["depth"][:][1], configF["Hberm"][:][1], configF["D50"][:][1]
+
+    if brk == 1
+        
+        Hs, Tp, θ_w = collect(skipmissing(wavF["Hs"][:])), collect(skipmissing(wavF["Tp"][:])), collect(skipmissing(wavF["Dir"][:]))
+
+        brkType = configF["brkType"][:][1]
+
+        auxAng, auxDepth = similar(Hs), similar(Hs)
+        auxAng .= angBati
+        auxDepth .= depth
+
+        println("Breaking waves by linear theory...")
+        Hb, θ_b, depthb = WAV.BreakingPropagation(Hs, Tp, θ_w, auxAng, auxDepth, "spectral")
+    else
+        Hb, Tp, Hs, depthb = wavF["Hb"][:], wavF["Tp"][:], wavF["Hs"][:], wavF["hb"][:]
+    end
+    
+    close(wavF)
+    close(ensF)
+    close(configF)
+    close(parF)
+
+    println("Datasets closed...")
+
+    Hs = convert(Array{Float64},Hs)
+    Tp = convert(Array{Float64},Tp)
+
+    kacr = convert(Array{Float64},kacr)
+    kero = convert(Array{Float64},kero)
+    Y0 = convert(Array{Float64},Y0)
+
+    Yi = convert(Array{Float64},yi)
+
+    ########## START HERE #############
+
+    println("Starting ShoreFor (Davidson et al. 2014) - Shoreline Rotation Model...")
+
+    P = Hs .^2 .* Tp
+    w = wMOORE(D50)
+
+    Omega = Hb ./ (w .* Tp)
+
+    Y_t = ShoreFor(P, Omega, dt, phi, c, D, Dr, Sini, k, flagR, r)
+
+    println("\n\n****************Finished****************\n\n")
+    
+end
+
 function ShoreFor_Hybrid(OmegaEQ,tp,hb,depthb,D50,Omega,dt,phi = 0, c = 0, D = 0, Dr = 0, Sini = 0, k = 0.5, flagR = 1)
 
     rho = 1025.
