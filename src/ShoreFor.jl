@@ -55,6 +55,7 @@ function run_ShoreFor()
     close(configF)
     close(parF)
 
+    
     println("Datasets closed...")
 
     Hs = convert(Array{Float64},Hs)
